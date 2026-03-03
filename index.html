@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>4-7-8 呼吸練習</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Raleway:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e1014;
+    --surface: #13161b;
+    --ink: #b8bec8;
+    --ink-dim: rgba(184, 190, 200, 0.3);
+    --accent: #7a8fa0;
+    --accent-dim: rgba(122, 143, 160, 0.1);
+    --hold-color: #6b8080;
+    --exhale-color: #7a8898;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Raleway', sans-serif;
+    font-weight: 300;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 55% 45% at 25% 15%, rgba(100,130,150,0.04) 0%, transparent 65%),
+      radial-gradient(ellipse 45% 55% at 80% 85%, rgba(80,110,120,0.03) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: env(safe-area-inset-top, 48px) 32px env(safe-area-inset-bottom, 40px);
+  }
+
+  .header { text-align: center; padding-top: 8px; }
+  .header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: clamp(28px, 7vw, 38px);
+    letter-spacing: 0.15em;
+    color: var(--ink);
+    opacity: 0.75;
+  }
+  .header .sub {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-top: 6px;
+    opacity: 0.5;
+  }
+
+  .orb-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: min(280px, 70vw);
+    height: min(280px, 70vw);
+  }
+
+  .orb-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(122,143,160,0.09);
+    animation: pulse-ring 4s ease-in-out infinite;
+  }
+  .orb-ring:nth-child(1) { width: 100%; height: 100%; animation-delay: 0s; }
+  .orb-ring:nth-child(2) { width: 85%; height: 85%; animation-delay: 0.5s; border-color: rgba(100,130,130,0.07); }
+  .orb-ring:nth-child(3) { width: 70%; height: 70%; animation-delay: 1s; border-color: rgba(122,143,160,0.05); }
+
+  @keyframes pulse-ring {
+    0%, 100% { transform: scale(1); opacity: 0.4; }
+    50% { transform: scale(1.03); opacity: 0.75; }
+  }
+
+  .orb {
+    width: 55%;
+    height: 55%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, rgba(122,143,160,0.12), rgba(100,130,130,0.05) 60%, transparent);
+    border: 1px solid rgba(122,143,160,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    transition: transform 0.3s ease;
+    box-shadow: 0 0 40px rgba(100,130,150,0.04), inset 0 0 30px rgba(100,130,130,0.02);
+  }
+
+  .orb.inhale  { animation: orb-grow var(--inhale-dur, 4s) ease-in forwards; }
+  .orb.hold    { animation: orb-hold var(--hold-dur, 7s) linear forwards; }
+  .orb.exhale  { animation: orb-shrink var(--exhale-dur, 8s) ease-out forwards; }
+
+  @keyframes orb-grow {
+    from { transform: scale(1);   box-shadow: 0 0 40px rgba(100,130,150,0.04), inset 0 0 30px rgba(100,130,130,0.02); }
+    to   { transform: scale(1.7); box-shadow: 0 0 65px rgba(100,130,150,0.1),  inset 0 0 50px rgba(100,130,130,0.06); }
+  }
+  @keyframes orb-hold {
+    from { transform: scale(1.7); }
+    to   { transform: scale(1.7); }
+  }
+  @keyframes orb-shrink {
+    from { transform: scale(1.7); box-shadow: 0 0 65px rgba(100,130,150,0.1),  inset 0 0 50px rgba(100,130,130,0.06); }
+    to   { transform: scale(1);   box-shadow: 0 0 40px rgba(100,130,150,0.04), inset 0 0 30px rgba(100,130,130,0.02); }
+  }
+
+  .phase-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400;
+    font-size: clamp(14px, 4vw, 18px);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .phase-text.visible { opacity: 0.65; }
+
+  .phase-count {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: clamp(36px, 10vw, 52px);
+    color: var(--accent);
+    line-height: 1;
+    margin-top: 4px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .phase-count.visible { opacity: 0.8; }
+
+  .progress-svg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+  .progress-track { fill: none; stroke: rgba(122,143,160,0.06); stroke-width: 1.5; }
+  .progress-arc {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s linear, stroke 0.5s ease;
+    opacity: 0.5;
+  }
+  .progress-arc.hold-phase  { stroke: var(--hold-color); }
+  .progress-arc.exhale-phase { stroke: var(--exhale-color); }
+
+  .instruction-label {
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-top: -12px;
+    text-align: center;
+    min-height: 20px;
+    transition: opacity 0.4s ease;
+  }
+
+  .bottom {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .cycle-info { display: flex; gap: 8px; align-items: center; }
+  .cycle-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    border: 1px solid rgba(122,143,160,0.2);
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .cycle-dot.done  { background: rgba(122,143,160,0.45); border-color: rgba(122,143,160,0.45); }
+  .cycle-dot.active { background: rgba(122,143,160,0.25); border-color: rgba(122,143,160,0.45); box-shadow: 0 0 5px rgba(122,143,160,0.18); }
+
+  .main-btn {
+    width: 100%;
+    max-width: 320px;
+    height: 56px;
+    border: 1px solid rgba(122,143,160,0.18);
+    border-radius: 28px;
+    background: rgba(122,143,160,0.05);
+    color: var(--accent);
+    font-family: 'Raleway', sans-serif;
+    font-weight: 300;
+    font-size: 12px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.3s, border-color 0.3s, transform 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    opacity: 0.8;
+  }
+  .main-btn:active { transform: scale(0.97); }
+  .main-btn.running {
+    border-color: rgba(122,143,160,0.12);
+    background: rgba(122,143,160,0.03);
+    color: rgba(122,143,160,0.5);
+  }
+
+  .settings-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+  }
+  .setting-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 20px;
+    background: rgba(255,255,255,0.02);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink-dim);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .setting-chip:active { background: rgba(255,255,255,0.04); }
+  .setting-chip span { color: rgba(122,143,160,0.6); font-weight: 400; }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(14,16,20,0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 24px;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+    backdrop-filter: blur(8px);
+  }
+  .overlay.show { opacity: 1; pointer-events: auto; }
+  .overlay-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: 42px;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    opacity: 0.7;
+    text-align: center;
+  }
+  .overlay-sub {
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    opacity: 0.5;
+    text-align: center;
+  }
+  .overlay-btn {
+    margin-top: 12px;
+    padding: 14px 40px;
+    border: 1px solid rgba(122,143,160,0.18);
+    border-radius: 28px;
+    background: transparent;
+    color: var(--accent);
+    font-family: 'Raleway', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.3s;
+    -webkit-appearance: none;
+    opacity: 0.7;
+  }
+  .overlay-btn:active { background: rgba(122,143,160,0.07); }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(14,16,20,0.8);
+    z-index: 200;
+    display: flex;
+    align-items: flex-end;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(4px);
+  }
+  .modal-backdrop.show { opacity: 1; pointer-events: auto; }
+  .modal {
+    width: 100%;
+    background: #13161b;
+    border-top: 1px solid rgba(122,143,160,0.08);
+    border-radius: 24px 24px 0 0;
+    padding: 28px 28px calc(28px + env(safe-area-inset-bottom, 0px));
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .modal-backdrop.show .modal { transform: translateY(0); }
+  .modal h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400;
+    font-size: 22px;
+    letter-spacing: 0.1em;
+    margin-bottom: 24px;
+    color: var(--ink);
+    opacity: 0.6;
+  }
+  .modal-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .modal-row:last-of-type { border-bottom: none; }
+  .modal-label { font-size: 13px; color: var(--ink-dim); letter-spacing: 0.05em; }
+  .modal-value { font-size: 24px; color: var(--ink); opacity: 0.65; font-family: 'Cormorant Garamond', serif; display: flex; align-items: center; gap: 14px; }
+  .step-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.07);
+    background: rgba(255,255,255,0.03);
+    color: var(--ink);
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    -webkit-appearance: none;
+    outline: none;
+    opacity: 0.6;
+  }
+  .step-btn:active { background: rgba(255,255,255,0.07); }
+  .modal-close {
+    width: 100%;
+    margin-top: 20px;
+    height: 50px;
+    border: 1px solid rgba(122,143,160,0.15);
+    border-radius: 25px;
+    background: rgba(122,143,160,0.05);
+    color: var(--accent);
+    font-family: 'Raleway', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    cursor: pointer;
+    -webkit-appearance: none;
+    outline: none;
+    opacity: 0.65;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <h1>呼吸</h1>
+    <div class="sub">4 · 7 · 8 放鬆練習</div>
+  </div>
+
+  <div>
+    <div class="orb-container" id="orbContainer">
+      <div class="orb-ring"></div>
+      <div class="orb-ring"></div>
+      <div class="orb-ring"></div>
+      <svg class="progress-svg" viewBox="0 0 100 100">
+        <circle class="progress-track" cx="50" cy="50" r="48"/>
+        <circle class="progress-arc" id="progressArc" cx="50" cy="50" r="48"
+          stroke-dasharray="301.6" stroke-dashoffset="301.6"/>
+      </svg>
+      <div class="orb" id="orb">
+        <div class="phase-text" id="phaseText"></div>
+        <div class="phase-count" id="phaseCount"></div>
+      </div>
+    </div>
+    <div class="instruction-label" id="instructionLabel">輕觸開始</div>
+  </div>
+
+  <div class="bottom">
+    <div class="cycle-info" id="cycleDots"></div>
+    <button class="main-btn" id="mainBtn" onclick="toggleBreathing()">開始練習</button>
+    <div class="settings-row">
+      <div class="setting-chip" onclick="openSettings()">週期 <span id="chipCycles">4</span> 次</div>
+      <div class="setting-chip" onclick="openSettings()">節拍器 <span id="chipSound">開</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="overlay-title">完成了</div>
+  <div class="overlay-sub">你已完成 <span id="overlayCount"></span> 次呼吸循環</div>
+  <button class="overlay-btn" onclick="closeOverlay()">再來一次</button>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeSettingsOutside(event)">
+  <div class="modal">
+    <h2>練習設定</h2>
+    <div class="modal-row">
+      <div class="modal-label">循環次數</div>
+      <div class="modal-value">
+        <button class="step-btn" onclick="adjustSetting('cycles',-1)">−</button>
+        <span id="setCycles">4</span>
+        <button class="step-btn" onclick="adjustSetting('cycles',1)">+</button>
+      </div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-label">吸氣（秒）</div>
+      <div class="modal-value">
+        <button class="step-btn" onclick="adjustSetting('inhale',-1)">−</button>
+        <span id="setInhale">4</span>
+        <button class="step-btn" onclick="adjustSetting('inhale',1)">+</button>
+      </div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-label">閉氣（秒）</div>
+      <div class="modal-value">
+        <button class="step-btn" onclick="adjustSetting('hold',-1)">−</button>
+        <span id="setHold">7</span>
+        <button class="step-btn" onclick="adjustSetting('hold',1)">+</button>
+      </div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-label">吐氣（秒）</div>
+      <div class="modal-value">
+        <button class="step-btn" onclick="adjustSetting('exhale',-1)">−</button>
+        <span id="setExhale">8</span>
+        <button class="step-btn" onclick="adjustSetting('exhale',1)">+</button>
+      </div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-label">聲音提示</div>
+      <div class="modal-value">
+        <button class="step-btn" onclick="toggleSound()"><span id="soundIcon">♪</span></button>
+      </div>
+    </div>
+    <button class="modal-close" onclick="closeSettings()">完成</button>
+  </div>
+</div>
+
+<script>
+const cfg = { cycles: 4, inhale: 4, hold: 7, exhale: 8, sound: true };
+let running = false, currentCycle = 0, stopFlag = false;
+let phaseTimer = null, countTimer = null, audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playTone(freq, duration, type = 'sine', gain = 0.12) {
+  if (!cfg.sound) return;
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.connect(g); g.connect(ctx.destination);
+    osc.type = type; osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    g.gain.setValueAtTime(0, ctx.currentTime);
+    g.gain.linearRampToValueAtTime(gain, ctx.currentTime + 0.1);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+
+function renderDots() {
+  const el = document.getElementById('cycleDots');
+  el.innerHTML = '';
+  for (let i = 0; i < cfg.cycles; i++) {
+    const d = document.createElement('div');
+    d.className = 'cycle-dot' + (i < currentCycle ? ' done' : '') + (i === currentCycle && running ? ' active' : '');
+    el.appendChild(d);
+  }
+}
+
+function wait(ms) { return new Promise(r => { phaseTimer = setTimeout(r, ms); }); }
+
+function startCount(total) {
+  const el = document.getElementById('phaseCount');
+  let n = total; el.textContent = n; el.classList.add('visible');
+  let t = 0;
+  countTimer = setInterval(() => { t++; n = total - t; if (n >= 0) el.textContent = n; }, 1000);
+}
+
+function stopCount() {
+  clearInterval(countTimer);
+  document.getElementById('phaseCount').classList.remove('visible');
+}
+
+const arc = document.getElementById('progressArc');
+const circumference = 301.6;
+
+function animateArc(durationMs, phase) {
+  arc.style.transition = 'none';
+  arc.classList.remove('hold-phase','exhale-phase');
+  if (phase === 'hold') arc.classList.add('hold-phase');
+  if (phase === 'exhale') arc.classList.add('exhale-phase');
+  if (phase === 'inhale') {
+    arc.style.strokeDashoffset = circumference;
+    requestAnimationFrame(() => {
+      arc.style.transition = `stroke-dashoffset ${durationMs}ms linear, stroke 0.5s ease`;
+      arc.style.strokeDashoffset = 0;
+    });
+  } else if (phase === 'hold') {
+    arc.style.strokeDashoffset = 0;
+  } else {
+    arc.style.strokeDashoffset = 0;
+    requestAnimationFrame(() => {
+      arc.style.transition = `stroke-dashoffset ${durationMs}ms linear, stroke 0.5s ease`;
+      arc.style.strokeDashoffset = circumference;
+    });
+  }
+}
+
+function resetArc() {
+  arc.style.transition = 'none';
+  arc.style.strokeDashoffset = circumference;
+  arc.classList.remove('hold-phase','exhale-phase');
+}
+
+const orb = document.getElementById('orb');
+function setOrbPhase(phase) {
+  orb.className = 'orb';
+  document.documentElement.style.setProperty('--inhale-dur', cfg.inhale + 's');
+  document.documentElement.style.setProperty('--hold-dur', cfg.hold + 's');
+  document.documentElement.style.setProperty('--exhale-dur', cfg.exhale + 's');
+  void orb.offsetWidth;
+  if (phase) orb.classList.add(phase);
+}
+
+function setLabel(text, sub) {
+  const pt = document.getElementById('phaseText');
+  pt.classList.remove('visible');
+  setTimeout(() => { pt.textContent = text; pt.classList.add('visible'); }, 200);
+  document.getElementById('instructionLabel').textContent = sub || '';
+}
+
+async function runBreathing() {
+  stopFlag = false; running = true; currentCycle = 0; renderDots();
+  document.getElementById('mainBtn').textContent = '停止練習';
+  document.getElementById('mainBtn').classList.add('running');
+
+  for (let c = 0; c < cfg.cycles; c++) {
+    if (stopFlag) break;
+    currentCycle = c; renderDots();
+
+    playTone(396, 0.6);
+    setOrbPhase('inhale'); animateArc(cfg.inhale * 1000, 'inhale');
+    setLabel('吸氣', '用鼻子慢慢吸入'); startCount(cfg.inhale);
+    await wait(cfg.inhale * 1000);
+    if (stopFlag) break; stopCount();
+
+    playTone(320, 0.5);
+    setOrbPhase('hold'); animateArc(cfg.hold * 1000, 'hold');
+    setLabel('閉氣', '輕鬆地屏住呼吸'); startCount(cfg.hold);
+    await wait(cfg.hold * 1000);
+    if (stopFlag) break; stopCount();
+
+    playTone(252, 0.8, 'sine', 0.1);
+    setOrbPhase('exhale'); animateArc(cfg.exhale * 1000, 'exhale');
+    setLabel('吐氣', '用嘴巴完全吐出'); startCount(cfg.exhale);
+    await wait(cfg.exhale * 1000);
+    if (stopFlag) break; stopCount();
+  }
+
+  stopCount(); running = false; orb.className = 'orb'; resetArc();
+
+  if (!stopFlag) {
+    currentCycle = cfg.cycles; renderDots();
+    document.getElementById('overlayCount').textContent = cfg.cycles;
+    document.getElementById('overlay').classList.add('show');
+    playTone(432, 1.8, 'sine', 0.12);
+  }
+
+  document.getElementById('phaseText').classList.remove('visible');
+  document.getElementById('phaseCount').classList.remove('visible');
+  document.getElementById('mainBtn').textContent = '開始練習';
+  document.getElementById('mainBtn').classList.remove('running');
+  document.getElementById('instructionLabel').textContent = '輕觸開始';
+}
+
+function toggleBreathing() {
+  if (running) {
+    stopFlag = true; clearTimeout(phaseTimer); clearInterval(countTimer);
+    running = false; orb.className = 'orb'; resetArc();
+    document.getElementById('phaseText').classList.remove('visible');
+    document.getElementById('phaseCount').classList.remove('visible');
+    document.getElementById('mainBtn').textContent = '開始練習';
+    document.getElementById('mainBtn').classList.remove('running');
+    document.getElementById('instructionLabel').textContent = '輕觸開始';
+    currentCycle = 0; renderDots();
+  } else { runBreathing(); }
+}
+
+function closeOverlay() {
+  document.getElementById('overlay').classList.remove('show');
+  currentCycle = 0; renderDots();
+}
+
+function openSettings() {
+  if (running) return;
+  ['cycles','inhale','hold','exhale'].forEach(k => {
+    document.getElementById('set' + k.charAt(0).toUpperCase() + k.slice(1)).textContent = cfg[k];
+  });
+  document.getElementById('modalBackdrop').classList.add('show');
+}
+
+function closeSettings() {
+  document.getElementById('modalBackdrop').classList.remove('show');
+  document.getElementById('chipCycles').textContent = cfg.cycles;
+}
+
+function closeSettingsOutside(e) {
+  if (e.target === document.getElementById('modalBackdrop')) closeSettings();
+}
+
+function adjustSetting(key, delta) {
+  const mins = { cycles:1, inhale:2, hold:2, exhale:2 };
+  const maxs = { cycles:12, inhale:10, hold:15, exhale:16 };
+  cfg[key] = Math.max(mins[key], Math.min(maxs[key], cfg[key] + delta));
+  document.getElementById('set' + key.charAt(0).toUpperCase() + key.slice(1)).textContent = cfg[key];
+}
+
+function toggleSound() {
+  cfg.sound = !cfg.sound;
+  document.getElementById('soundIcon').textContent = cfg.sound ? '♪' : '✕';
+  document.getElementById('chipSound').querySelector('span').textContent = cfg.sound ? '開' : '關';
+}
+
+renderDots();
+</script>
+</body>
+</html>
